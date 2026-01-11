@@ -1191,7 +1191,7 @@ tablet_pad_dial_v2_interface : interface
 
 @(private)
 @(init)
-init_interfaces_tablet_v2 :: proc() {
+init_interfaces_tablet_v2 :: proc "contextless" () {
 	tablet_manager_v2_interface.name = "zwp_tablet_manager_v2"
 	tablet_manager_v2_interface.version = 2
 	tablet_manager_v2_interface.method_count = 2

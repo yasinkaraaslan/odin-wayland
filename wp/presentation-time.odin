@@ -226,7 +226,7 @@ presentation_feedback_interface : interface
 
 @(private)
 @(init)
-init_interfaces_presentation_time :: proc() {
+init_interfaces_presentation_time :: proc "contextless" () {
 	presentation_interface.name = "wp_presentation"
 	presentation_interface.version = 2
 	presentation_interface.method_count = 2
@@ -254,8 +254,6 @@ proxy_get_user_data :: wl.proxy_get_user_data
 proxy_set_user_data :: wl.proxy_set_user_data
 proxy_get_version :: wl.proxy_get_version
 proxy_marshal :: wl.proxy_marshal
-proxy_marshal_array :: wl.proxy_marshal_array
 proxy_marshal_flags :: wl.proxy_marshal_flags
-proxy_marshal_array_flags :: wl.proxy_marshal_array_flags
 proxy_marshal_constructor :: wl.proxy_marshal_constructor
 proxy_destroy :: wl.proxy_destroy

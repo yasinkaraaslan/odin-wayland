@@ -172,7 +172,7 @@ viewport_interface : interface
 
 @(private)
 @(init)
-init_interfaces_viewporter :: proc() {
+init_interfaces_viewporter :: proc "contextless" () {
 	viewporter_interface.name = "wp_viewporter"
 	viewporter_interface.version = 1
 	viewporter_interface.method_count = 2

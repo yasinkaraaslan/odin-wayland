@@ -1254,7 +1254,7 @@ popup_interface : interface
 
 @(private)
 @(init)
-init_interfaces_xdg_shell :: proc() {
+init_interfaces_xdg_shell :: proc "contextless" () {
 	wm_base_interface.name = "xdg_wm_base"
 	wm_base_interface.version = 7
 	wm_base_interface.method_count = 4

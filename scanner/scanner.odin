@@ -465,7 +465,7 @@ generate_code :: proc(protocol: Protocol, package_name: string, emit_libwayland:
 
    fmt.sbprintln(&sb, "@(private)")
    fmt.sbprintln(&sb, "@(init)")
-   fmt.sbprintfln(&sb, "init_interfaces_%v :: proc() {{", protocol.name)
+   fmt.sbprintfln(&sb, "init_interfaces_%v :: proc \"contextless\" () {{", protocol.name)
    for interface in protocol.interfaces {
       request_count := len(interface.requests)
       event_count := len(interface.events)

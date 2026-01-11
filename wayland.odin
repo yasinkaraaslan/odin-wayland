@@ -3046,7 +3046,7 @@ fixes_interface : interface
 
 @(private)
 @(init)
-init_interfaces_wayland :: proc() {
+init_interfaces_wayland :: proc "contextless" () {
 	display_interface.name = "wl_display"
 	display_interface.version = 1
 	display_interface.method_count = 2

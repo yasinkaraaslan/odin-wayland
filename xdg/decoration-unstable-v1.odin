@@ -164,7 +164,7 @@ toplevel_decoration_v1_interface : interface
 
 @(private)
 @(init)
-init_interfaces_xdg_decoration_unstable_v1 :: proc() {
+init_interfaces_xdg_decoration_unstable_v1 :: proc "contextless" () {
 	decoration_manager_v1_interface.name = "zxdg_decoration_manager_v1"
 	decoration_manager_v1_interface.version = 1
 	decoration_manager_v1_interface.method_count = 2

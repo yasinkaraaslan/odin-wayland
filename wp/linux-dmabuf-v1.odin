@@ -578,7 +578,7 @@ linux_dmabuf_feedback_v1_interface : interface
 
 @(private)
 @(init)
-init_interfaces_linux_dmabuf_v1 :: proc() {
+init_interfaces_linux_dmabuf_v1 :: proc "contextless" () {
 	linux_dmabuf_v1_interface.name = "zwp_linux_dmabuf_v1"
 	linux_dmabuf_v1_interface.version = 5
 	linux_dmabuf_v1_interface.method_count = 4
