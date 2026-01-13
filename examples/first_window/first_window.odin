@@ -1,7 +1,7 @@
 // Taken from wayland-book.com
 package first_window
-import wl "shared:wayland"
-import "shared:wayland/xdg"
+import wl "../.."
+import "../../xdg"
 import "core:fmt"
 import "base:runtime"
 import "core:sys/linux"

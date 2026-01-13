@@ -1,8 +1,8 @@
 package egl_example
-import wl "shared:wayland"
+import wl "../.."
 import "vendor:egl"
 import gl "vendor:OpenGL"
-import "shared:wayland/ext/libdecor"
+import "../../ext/libdecor"
 import "base:runtime"
 import "core:fmt"
 import "core:os"
