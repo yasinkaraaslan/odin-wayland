@@ -186,4 +186,4 @@ init_interfaces_viewporter :: proc "contextless" () {
 }
 
 // Functions from libwayland-client
-import wl "shared:wayland"
+import wl ".."

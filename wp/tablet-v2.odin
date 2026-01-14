@@ -1248,4 +1248,4 @@ init_interfaces_tablet_v2 :: proc "contextless" () {
 }
 
 // Functions from libwayland-client
-import wl "shared:wayland"
+import wl ".."

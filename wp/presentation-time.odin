@@ -241,7 +241,7 @@ init_interfaces_presentation_time :: proc "contextless" () {
 }
 
 // Functions from libwayland-client
-import wl "shared:wayland"
+import wl ".."
 fixed_t :: wl.fixed_t
 proxy :: wl.proxy
 message :: wl.message

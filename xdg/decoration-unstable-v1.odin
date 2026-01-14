@@ -179,4 +179,4 @@ init_interfaces_xdg_decoration_unstable_v1 :: proc "contextless" () {
 }
 
 // Functions from libwayland-client
-import wl "shared:wayland"
+import wl ".."

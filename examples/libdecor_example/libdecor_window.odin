@@ -1,7 +1,6 @@
 package libdecor_example
-import wl "shared:wayland"
-import "shared:wayland/xdg"
-import "shared:wayland/ext/libdecor"
+import wl "../.."
+import "../../ext/libdecor"
 import "core:fmt"
 import "core:sys/linux"
 import "core:sys/posix"

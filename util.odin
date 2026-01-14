@@ -10,7 +10,7 @@ argument :: union {}
 message :: struct {
    name: cstring,
    signature: cstring,
-   types: [^]^interface
+   types: [^]^interface,
 }
 interface :: struct {
    name: cstring,
@@ -23,5 +23,5 @@ interface :: struct {
 array :: struct {
    size: i64,
    alloc: i64,
-   data: rawptr
+   data: rawptr,
 }

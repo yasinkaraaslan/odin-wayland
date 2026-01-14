@@ -1,6 +1,6 @@
 package libdecor
-import wl "shared:wayland"
-import xdg "shared:wayland/xdg"
+import wl "../.."
+import xdg "../../xdg"
 
 foreign import libdecor_lib "system:decor-0"
 

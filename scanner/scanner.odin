@@ -6,7 +6,7 @@ import "core:strings"
 import "core:flags"
 import "core:os"
 import "core:path/filepath"
-import "core:time"
+
 Procedure_Type :: enum {
    Request,
    Event,
@@ -347,7 +347,7 @@ parse_file :: proc(filename: string) -> Protocol {
    return protocol
 }
 
-generate_code :: proc(protocol: Protocol, package_name: string, emit_libwayland: bool) -> string {
+generate_code :: proc(protocol: Protocol, package_name, output_path, wayland_dir: string, emit_libwayland: bool) -> string {
    sb: strings.Builder
    strings.write_string(&sb, "#+build linux\n")
    fmt.sbprintln(&sb,"package",package_name)
@@ -482,8 +482,8 @@ generate_code :: proc(protocol: Protocol, package_name: string, emit_libwayland:
       }
    }
    fmt.sbprintln(&sb, "}")
-   fmt.sbprintln(&sb, "\n// Functions from libwayland-client")
    if protocol.name == "wayland" {
+      fmt.sbprintln(&sb, "\n// Functions from libwayland-client")
       fmt.sbprintln(&sb, `import "core:c"`)
       fmt.sbprintln(&sb,`foreign import wl_lib "system:wayland-client"`)
 
@@ -535,7 +535,17 @@ foreign wl_lib {
 }`)
    }
    else {
-      fmt.sbprintln(&sb, `import wl "shared:wayland"`)
+      fmt.sbprintln(&sb, "\n// Functions from libwayland-client")
+      // resolve relative import to wayland base types
+      if wayland_dir == "" {
+         fmt.sbprintln(&sb, `import wl ".."`) // default
+      } else {
+         output_dir := filepath.abs(output_path) or_else output_path
+         wayland_abs := filepath.abs(wayland_dir) or_else wayland_dir
+         rel_import := filepath.rel(output_dir, wayland_abs) or_else ".."
+         fmt.sbprintfln(&sb, `import wl "%s"`, rel_import)
+      }
+
       if emit_libwayland {
          add_wl_name(&sb, "fixed_t")
          add_wl_name(&sb, "proxy")
@@ -591,9 +601,12 @@ main :: proc() {
       package_name: string `args:"pos=2" usage:"Package name for output code"`,
 		verbose: bool `args:"pos=3" usage:"Show verbose output."`,
       dont_emit_libwayland: bool `args:"pos=4" usage:"Do not include libwayland procedures in the output code."`,
+      wayland_dir: string `args:"pos=5" usage:"Relative path from output file to directory which contains wayland base type definitions (default: parent dir).
+      Only used when the protocol name is not wayland itself."`,
    }
    style := flags.Parsing_Style.Odin
    flags.parse_or_exit(&options, os.args, style)
+
    context.logger = log.create_console_logger(opt={}) if options.verbose else log.Logger{}
    protocol := parse_file(options.input)
    output_filename : string
@@ -607,7 +620,7 @@ main :: proc() {
    fmt.println("Outputting to:", output_filename)
 
    package_name := options.package_name if options.package_name != "" else protocol.name
-   code := generate_code(protocol, package_name, !options.dont_emit_libwayland)
+   code := generate_code(protocol, package_name, options.output, options.wayland_dir, !options.dont_emit_libwayland)
    if !os.write_entire_file(output_filename, transmute([]u8)code) {
       fmt.println("There was an error outputting to the file:", os.get_last_error())
       return

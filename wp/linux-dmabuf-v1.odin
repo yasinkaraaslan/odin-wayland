@@ -600,4 +600,4 @@ init_interfaces_linux_dmabuf_v1 :: proc "contextless" () {
 }
 
 // Functions from libwayland-client
-import wl "shared:wayland"
+import wl ".."

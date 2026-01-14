@@ -1,5 +1,5 @@
 package hello_world
-import wl "shared:wayland"
+import wl "../../"
 import "core:fmt"
 import "base:runtime"
 
