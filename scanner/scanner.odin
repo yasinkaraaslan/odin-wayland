@@ -540,8 +540,8 @@ foreign wl_lib {
       if wayland_dir == "" {
          fmt.sbprintln(&sb, `import wl ".."`) // default
       } else {
-         output_dir := filepath.abs(output_path) or_else output_path
-         wayland_abs := filepath.abs(wayland_dir) or_else wayland_dir
+         output_dir := filepath.abs(output_path, context.temp_allocator) or_else output_path
+         wayland_abs := filepath.abs(wayland_dir, context.temp_allocator) or_else wayland_dir
          rel_import := filepath.rel(output_dir, wayland_abs) or_else ".."
          fmt.sbprintfln(&sb, `import wl "%s"`, rel_import)
       }
@@ -621,8 +621,8 @@ main :: proc() {
 
    package_name := options.package_name if options.package_name != "" else protocol.name
    code := generate_code(protocol, package_name, options.output, options.wayland_dir, !options.dont_emit_libwayland)
-   if !os.write_entire_file(output_filename, transmute([]u8)code) {
-      fmt.println("There was an error outputting to the file:", os.get_last_error())
+   if error := os.write_entire_file(output_filename, transmute([]u8)code); error != os.General_Error.None {
+      fmt.println("There was an error outputting to the file:", os.error_string(error))
       return
    }
 
