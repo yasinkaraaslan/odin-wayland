@@ -176,7 +176,7 @@ parse_procedure :: proc(doc: ^xml.Document, id: u32, type: Procedure_Type, inter
          procedure.all_null = false
       }
 
-      if arg.type == .New_Id && interface_found {
+      if arg.type == .New_Id && interface_found && type == .Request {
          procedure.ret = arg
       }
       else {
@@ -232,7 +232,7 @@ get_procedures_text :: proc(procedures: []Procedure, var_name: string, protocol_
 
    return strings.to_string(sb)
 }
-get_argument_text :: proc(arg: Argument) -> string {
+get_argument_text :: proc(arg: Argument, force_name := false) -> string {
    sb: strings.Builder
    forward_text: string
    ret := false
@@ -260,7 +260,7 @@ get_argument_text :: proc(arg: Argument) -> string {
       case .Array:
          forward_text = "array"
    }
-   if !ret do fmt.sbprintf(&sb, "%v_: ", arg.name)
+   if (!ret || force_name) do fmt.sbprintf(&sb, "%v_: ", arg.name)
    fmt.sbprint(&sb, forward_text)
    return strings.to_string(sb)
 }
@@ -429,7 +429,7 @@ generate_code :: proc(protocol: Protocol, package_name, output_path, wayland_dir
                fmt.sbprint(&sb, "\t")
                fmt.sbprintf(&sb,`%v : proc "c" (data: rawptr, %v: ^%v`, event.name, interface.name, interface.name)
                for arg, i in event.args {
-                  fmt.sbprintf(&sb, ", %v",get_argument_text(arg))
+                  fmt.sbprintf(&sb, ", %v",get_argument_text(arg, true))
 
                }
                if event.ret != nil do fmt.sbprintfln(&sb, ") -> %v,\n", get_argument_text(event.ret.?))
