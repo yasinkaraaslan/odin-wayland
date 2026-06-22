@@ -540,11 +540,10 @@ foreign wl_lib {
       if wayland_dir == "" {
          fmt.sbprintln(&sb, `import wl ".."`) // default
       } else {
-         output_dir: string
-         output_dir_abs := filepath.abs(output_path, context.temp_allocator) or_else output_path
-         output_dir, _ = os.split_path(output_dir_abs) 
+         output_dir := filepath.dir(output_path, context.temp_allocator)
+         output_dir_abs := filepath.abs(output_dir, context.temp_allocator) or_else output_dir
          wayland_abs := filepath.abs(wayland_dir, context.temp_allocator) or_else wayland_dir
-         rel_import := filepath.rel(output_dir, wayland_abs) or_else ".."
+         rel_import := filepath.rel(output_dir_abs, wayland_abs) or_else ".."
          fmt.sbprintfln(&sb, `import wl "%s"`, rel_import)
       }
 
