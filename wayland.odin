@@ -129,14 +129,14 @@ display_listener :: struct {
 	by the object interface.  As such, each interface defines its
 	own set of error codes.  The message is a brief description
 	of the error, for (debugging) convenience. */
-	error : proc "c" (data: rawptr, display: ^display, object_id_: rawptr, code_: uint, message_: cstring),
+	error : proc "c" (data: rawptr, display_: ^display, object_id_: rawptr, code_: uint, message_: cstring),
 
 /* This event is used internally by the object ID management
 	logic. When a client deletes an object that it had created,
 	the server will send this event to acknowledge that it has
 	seen the delete request. When the client receives this event,
 	it will know that it can safely reuse the object ID. */
-	delete_id : proc "c" (data: rawptr, display: ^display, id_: uint),
+	delete_id : proc "c" (data: rawptr, display_: ^display, id_: uint),
 
 }
 display_add_listener :: proc "contextless" (display_: ^display, listener: ^display_listener, data: rawptr) {
@@ -211,7 +211,7 @@ registry_listener :: struct {
 	The event notifies the client that a global object with
 	the given name is now available, and it implements the
 	given version of the given interface. */
-	global : proc "c" (data: rawptr, registry: ^registry, name_: uint, interface_: cstring, version_: uint),
+	global : proc "c" (data: rawptr, registry_: ^registry, name_: uint, interface_: cstring, version_: uint),
 
 /* Notify the client of removed global objects.
 
@@ -223,7 +223,7 @@ registry_listener :: struct {
 	The object remains valid and requests to the object will be
 	ignored until the client destroys it, to avoid races between
 	the global going away and a client sending a request to it. */
-	global_remove : proc "c" (data: rawptr, registry: ^registry, name_: uint),
+	global_remove : proc "c" (data: rawptr, registry_: ^registry, name_: uint),
 
 }
 registry_add_listener :: proc "contextless" (registry_: ^registry, listener: ^registry_listener, data: rawptr) {
@@ -262,7 +262,7 @@ callback_destroy :: proc "contextless" (callback_: ^callback) {
 
 callback_listener :: struct {
 /* Notify the client when the related request is done. */
-	done : proc "c" (data: rawptr, callback: ^callback, callback_data_: uint),
+	done : proc "c" (data: rawptr, callback_: ^callback, callback_data_: uint),
 
 }
 callback_add_listener :: proc "contextless" (callback_: ^callback, listener: ^callback_listener, data: rawptr) {
@@ -426,7 +426,7 @@ shm_listener :: struct {
 /* Informs the client about a valid pixel format that
 	can be used for buffers. Known formats include
 	argb8888 and xrgb8888. */
-	format : proc "c" (data: rawptr, shm: ^shm, format_: shm_format),
+	format : proc "c" (data: rawptr, shm_: ^shm, format_: shm_format),
 
 }
 shm_add_listener :: proc "contextless" (shm_: ^shm, listener: ^shm_listener, data: rawptr) {
@@ -636,7 +636,7 @@ buffer_listener :: struct {
 	this is possible, when the compositor maintains a copy of the
 	wl_surface contents, e.g. as a GL texture. This is an important
 	optimization for GL(ES) compositors with wl_shm clients. */
-	release : proc "c" (data: rawptr, buffer: ^buffer),
+	release : proc "c" (data: rawptr, buffer_: ^buffer),
 
 }
 buffer_add_listener :: proc "contextless" (buffer_: ^buffer, listener: ^buffer_listener, data: rawptr) {
@@ -765,20 +765,20 @@ data_offer_finish :: proc "contextless" (data_offer_: ^data_offer) {
 	This request can only be made on drag-and-drop offers, a protocol error
 	will be raised otherwise. */
 DATA_OFFER_SET_ACTIONS :: 4
-data_offer_set_actions :: proc "contextless" (data_offer_: ^data_offer, dnd_actions_: data_device_manager_dnd_action, preferred_action_: data_device_manager_dnd_action) {
+data_offer_set_actions :: proc "contextless" (data_offer_: ^data_offer, dnd_actions_: data_device_manager_dnd_action_flags, preferred_action_: data_device_manager_dnd_action_flags) {
 	proxy_marshal_flags(cast(^proxy)data_offer_, DATA_OFFER_SET_ACTIONS, nil, proxy_get_version(cast(^proxy)data_offer_), 0, dnd_actions_, preferred_action_)
 }
 
 data_offer_listener :: struct {
 /* Sent immediately after creating the wl_data_offer object.  One
 	event per offered mime type. */
-	offer : proc "c" (data: rawptr, data_offer: ^data_offer, mime_type_: cstring),
+	offer : proc "c" (data: rawptr, data_offer_: ^data_offer, mime_type_: cstring),
 
 /* This event indicates the actions offered by the data source. It
 	will be sent immediately after creating the wl_data_offer object,
 	or anytime the source side changes its offered actions through
 	wl_data_source.set_actions. */
-	source_actions : proc "c" (data: rawptr, data_offer: ^data_offer, source_actions_: data_device_manager_dnd_action),
+	source_actions : proc "c" (data: rawptr, data_offer_: ^data_offer, source_actions_: data_device_manager_dnd_action_flags),
 
 /* This event indicates the action selected by the compositor after
 	matching the source/destination side actions. Only one action (or
@@ -815,7 +815,7 @@ data_offer_listener :: struct {
 	user (e.g. popping up a menu with the available options). The
 	final wl_data_offer.set_actions and wl_data_offer.accept requests
 	must happen before the call to wl_data_offer.finish. */
-	action : proc "c" (data: rawptr, data_offer: ^data_offer, dnd_action_: data_device_manager_dnd_action),
+	action : proc "c" (data: rawptr, data_offer_: ^data_offer, dnd_action_: data_device_manager_dnd_action_flags),
 
 }
 data_offer_add_listener :: proc "contextless" (data_offer_: ^data_offer, listener: ^data_offer_listener, data: rawptr) {
@@ -887,7 +887,7 @@ data_source_destroy :: proc "contextless" (data_source_: ^data_source) {
 	wl_data_device.start_drag. Attempting to use the source other than
 	for drag-and-drop will raise a protocol error. */
 DATA_SOURCE_SET_ACTIONS :: 2
-data_source_set_actions :: proc "contextless" (data_source_: ^data_source, dnd_actions_: data_device_manager_dnd_action) {
+data_source_set_actions :: proc "contextless" (data_source_: ^data_source, dnd_actions_: data_device_manager_dnd_action_flags) {
 	proxy_marshal_flags(cast(^proxy)data_source_, DATA_SOURCE_SET_ACTIONS, nil, proxy_get_version(cast(^proxy)data_source_), 0, dnd_actions_)
 }
 
@@ -896,12 +896,12 @@ data_source_listener :: struct {
 	a target does not accept any of the offered types, type is NULL.
 
 	Used for feedback during drag-and-drop. */
-	target : proc "c" (data: rawptr, data_source: ^data_source, mime_type_: cstring),
+	target : proc "c" (data: rawptr, data_source_: ^data_source, mime_type_: cstring),
 
 /* Request for data from the client.  Send the data as the
 	specified mime type over the passed file descriptor, then
 	close it. */
-	send : proc "c" (data: rawptr, data_source: ^data_source, mime_type_: cstring, fd_: int),
+	send : proc "c" (data: rawptr, data_source_: ^data_source, mime_type_: cstring, fd_: int),
 
 /* This data source is no longer valid. There are several reasons why
 	this could happen:
@@ -923,7 +923,7 @@ data_source_listener :: struct {
 	For objects of version 2 or older, wl_data_source.cancelled will
 	only be emitted if the data source was replaced by another data
 	source. */
-	cancelled : proc "c" (data: rawptr, data_source: ^data_source),
+	cancelled : proc "c" (data: rawptr, data_source_: ^data_source),
 
 /* The user performed the drop action. This event does not indicate
 	acceptance, wl_data_source.cancelled may still be emitted afterwards
@@ -934,7 +934,7 @@ data_source_listener :: struct {
 
 	Note that the data_source may still be used in the future and should
 	not be destroyed here. */
-	dnd_drop_performed : proc "c" (data: rawptr, data_source: ^data_source),
+	dnd_drop_performed : proc "c" (data: rawptr, data_source_: ^data_source),
 
 /* The drop destination finished interoperating with this data
 	source, so the client is now free to destroy this data source and
@@ -942,7 +942,7 @@ data_source_listener :: struct {
 
 	If the action used to perform the operation was "move", the
 	source can now delete the transferred data. */
-	dnd_finished : proc "c" (data: rawptr, data_source: ^data_source),
+	dnd_finished : proc "c" (data: rawptr, data_source_: ^data_source),
 
 /* This event indicates the action selected by the compositor after
 	matching the source/destination side actions. Only one action (or
@@ -969,7 +969,7 @@ data_source_listener :: struct {
 
 	Clients can trigger cursor surface changes from this point, so
 	they reflect the current action. */
-	action : proc "c" (data: rawptr, data_source: ^data_source, dnd_action_: data_device_manager_dnd_action),
+	action : proc "c" (data: rawptr, data_source_: ^data_source, dnd_action_: data_device_manager_dnd_action_flags),
 
 }
 data_source_add_listener :: proc "contextless" (data_source_: ^data_source, listener: ^data_source_listener, data: rawptr) {
@@ -1078,24 +1078,24 @@ data_device_listener :: struct {
 	following the data_device.data_offer event, the new data_offer
 	object will send out data_offer.offer events to describe the
 	mime types it offers. */
-	data_offer : proc "c" (data: rawptr, data_device: ^data_device) -> ^data_offer,
+	data_offer : proc "c" (data: rawptr, data_device_: ^data_device, id_: ^data_offer),
 
 /* This event is sent when an active drag-and-drop pointer enters
 	a surface owned by the client.  The position of the pointer at
 	enter time is provided by the x and y arguments, in surface-local
 	coordinates. */
-	enter : proc "c" (data: rawptr, data_device: ^data_device, serial_: uint, surface_: ^surface, x_: fixed_t, y_: fixed_t, id_: ^data_offer),
+	enter : proc "c" (data: rawptr, data_device_: ^data_device, serial_: uint, surface_: ^surface, x_: fixed_t, y_: fixed_t, id_: ^data_offer),
 
 /* This event is sent when the drag-and-drop pointer leaves the
 	surface and the session ends.  The client must destroy the
 	wl_data_offer introduced at enter time at this point. */
-	leave : proc "c" (data: rawptr, data_device: ^data_device),
+	leave : proc "c" (data: rawptr, data_device_: ^data_device),
 
 /* This event is sent when the drag-and-drop pointer moves within
 	the currently focused surface. The new position of the pointer
 	is provided by the x and y arguments, in surface-local
 	coordinates. */
-	motion : proc "c" (data: rawptr, data_device: ^data_device, time_: uint, x_: fixed_t, y_: fixed_t),
+	motion : proc "c" (data: rawptr, data_device_: ^data_device, time_: uint, x_: fixed_t, y_: fixed_t),
 
 /* The event is sent when a drag-and-drop operation is ended
 	because the implicit grab is removed.
@@ -1110,7 +1110,7 @@ data_device_listener :: struct {
 	final. The drag-and-drop destination is expected to perform one last
 	wl_data_offer.set_actions request, or wl_data_offer.destroy in order
 	to cancel the operation. */
-	drop : proc "c" (data: rawptr, data_device: ^data_device),
+	drop : proc "c" (data: rawptr, data_device_: ^data_device),
 
 /* The selection event is sent out to notify the client of a new
 	wl_data_offer for the selection for this device.  The
@@ -1124,7 +1124,7 @@ data_device_listener :: struct {
 	keyboard focus within the same client doesn't mean a new selection
 	will be sent.  The client must destroy the previous selection
 	data_offer, if any, upon receiving this event. */
-	selection : proc "c" (data: rawptr, data_device: ^data_device, id_: ^data_offer),
+	selection : proc "c" (data: rawptr, data_device_: ^data_device, id_: ^data_offer),
 
 }
 data_device_add_listener :: proc "contextless" (data_device_: ^data_device, listener: ^data_device_listener, data: rawptr) {
@@ -1218,8 +1218,9 @@ data_device_manager_dnd_action :: enum {
 	none = 0,
 	copy = 1,
 	move = 2,
-	ask = 4,
+	ask = 3,
 }
+data_device_manager_dnd_action_flags :: bit_set[data_device_manager_dnd_action; u32]
 @(private)
 data_device_manager_requests := []message {
 	{"create_data_source", "n", raw_data(wayland_types)[34:]},
@@ -1625,7 +1626,7 @@ surface_listener :: struct {
 	output.
 
 	Note that a surface may be overlapping with zero or more outputs. */
-	enter : proc "c" (data: rawptr, surface: ^surface, output_: ^output),
+	enter : proc "c" (data: rawptr, surface_: ^surface, output_: ^output),
 
 /* This is emitted whenever a surface's creation, movement, or resizing
 	results in it no longer having any part of it within the scanout region
@@ -1636,7 +1637,7 @@ surface_listener :: struct {
 	has been sent, and the compositor might expect new surface content
 	updates even if no enter event has been sent. The frame event should be
 	used instead. */
-	leave : proc "c" (data: rawptr, surface: ^surface, output_: ^output),
+	leave : proc "c" (data: rawptr, surface_: ^surface, output_: ^output),
 
 /* This event indicates the preferred buffer scale for this surface. It is
 	sent whenever the compositor's preference changes.
@@ -1650,7 +1651,7 @@ surface_listener :: struct {
 	buffer.
 
 	The compositor shall emit a scale value greater than 0. */
-	preferred_buffer_scale : proc "c" (data: rawptr, surface: ^surface, factor_: int),
+	preferred_buffer_scale : proc "c" (data: rawptr, surface_: ^surface, factor_: int),
 
 /* This event indicates the preferred buffer transform for this surface.
 	It is sent whenever the compositor's preference changes.
@@ -1661,7 +1662,7 @@ surface_listener :: struct {
 	Applying this transformation to the surface buffer contents and using
 	wl_surface.set_buffer_transform might allow the compositor to use the
 	surface buffer more efficiently. */
-	preferred_buffer_transform : proc "c" (data: rawptr, surface: ^surface, transform_: output_transform),
+	preferred_buffer_transform : proc "c" (data: rawptr, surface_: ^surface, transform_: output_transform),
 
 }
 surface_add_listener :: proc "contextless" (surface_: ^surface, listener: ^surface_listener, data: rawptr) {
@@ -1791,7 +1792,7 @@ seat_listener :: struct {
 
 	The above behavior also applies to wl_keyboard and wl_touch with the
 	keyboard and touch capabilities, respectively. */
-	capabilities : proc "c" (data: rawptr, seat: ^seat, capabilities_: seat_capability),
+	capabilities : proc "c" (data: rawptr, seat_: ^seat, capabilities_: seat_capability_flags),
 
 /* In a multi-seat configuration the seat name can be used by clients to
 	help identify which physical devices the seat represents.
@@ -1809,7 +1810,7 @@ seat_listener :: struct {
 
 	Compositors may re-use the same seat name if the wl_seat global is
 	destroyed and re-created later. */
-	name : proc "c" (data: rawptr, seat: ^seat, name_: cstring),
+	name : proc "c" (data: rawptr, seat_: ^seat, name_: cstring),
 
 }
 seat_add_listener :: proc "contextless" (seat_: ^seat, listener: ^seat_listener, data: rawptr) {
@@ -1818,10 +1819,11 @@ seat_add_listener :: proc "contextless" (seat_: ^seat, listener: ^seat_listener,
 /* This is a bitmask of capabilities this seat has; if a member is
 	set, then it is present on the seat. */
 seat_capability :: enum {
-	pointer = 1,
-	keyboard = 2,
-	touch = 4,
+	pointer = 0,
+	keyboard = 1,
+	touch = 2,
 }
+seat_capability_flags :: bit_set[seat_capability; u32]
 /* These errors can be emitted in response to wl_seat requests. */
 seat_error :: enum {
 	missing_capability = 0,
@@ -1918,19 +1920,19 @@ pointer_listener :: struct {
 	When a seat's focus enters a surface, the pointer image
 	is undefined and a client should respond to this event by setting
 	an appropriate pointer image with the set_cursor request. */
-	enter : proc "c" (data: rawptr, pointer: ^pointer, serial_: uint, surface_: ^surface, surface_x_: fixed_t, surface_y_: fixed_t),
+	enter : proc "c" (data: rawptr, pointer_: ^pointer, serial_: uint, surface_: ^surface, surface_x_: fixed_t, surface_y_: fixed_t),
 
 /* Notification that this seat's pointer is no longer focused on
 	a certain surface.
 
 	The leave notification is sent before the enter notification
 	for the new focus. */
-	leave : proc "c" (data: rawptr, pointer: ^pointer, serial_: uint, surface_: ^surface),
+	leave : proc "c" (data: rawptr, pointer_: ^pointer, serial_: uint, surface_: ^surface),
 
 /* Notification of pointer location change. The arguments
 	surface_x and surface_y are the location relative to the
 	focused surface. */
-	motion : proc "c" (data: rawptr, pointer: ^pointer, time_: uint, surface_x_: fixed_t, surface_y_: fixed_t),
+	motion : proc "c" (data: rawptr, pointer_: ^pointer, time_: uint, surface_x_: fixed_t, surface_y_: fixed_t),
 
 /* Mouse button click and release notifications.
 
@@ -1946,7 +1948,7 @@ pointer_listener :: struct {
 	kernel's event code list. All other button codes above 0xFFFF are
 	currently undefined but may be used in future versions of this
 	protocol. */
-	button : proc "c" (data: rawptr, pointer: ^pointer, serial_: uint, time_: uint, button_: uint, state_: pointer_button_state),
+	button : proc "c" (data: rawptr, pointer_: ^pointer, serial_: uint, time_: uint, button_: uint, state_: pointer_button_state),
 
 /* Scroll and other axis notifications.
 
@@ -1964,7 +1966,7 @@ pointer_listener :: struct {
 
 	When applicable, a client can transform its content relative to the
 	scroll distance. */
-	axis : proc "c" (data: rawptr, pointer: ^pointer, time_: uint, axis_: pointer_axis, value_: fixed_t),
+	axis : proc "c" (data: rawptr, pointer_: ^pointer, time_: uint, axis_: pointer_axis, value_: fixed_t),
 
 /* Indicates the end of a set of events that logically belong together.
 	A client is expected to accumulate the data in all events within the
@@ -2000,7 +2002,7 @@ pointer_listener :: struct {
 	Compositor-specific policies may require the wl_pointer.leave and
 	wl_pointer.enter event being split across multiple wl_pointer.frame
 	groups. */
-	frame : proc "c" (data: rawptr, pointer: ^pointer),
+	frame : proc "c" (data: rawptr, pointer_: ^pointer),
 
 /* Source information for scroll and other axes.
 
@@ -2027,7 +2029,7 @@ pointer_listener :: struct {
 
 	The order of wl_pointer.axis_discrete and wl_pointer.axis_source is
 	not guaranteed. */
-	axis_source : proc "c" (data: rawptr, pointer: ^pointer, axis_source_: pointer_axis_source),
+	axis_source : proc "c" (data: rawptr, pointer_: ^pointer, axis_source_: pointer_axis_source),
 
 /* Stop notification for scroll and other axes.
 
@@ -2043,7 +2045,7 @@ pointer_listener :: struct {
 	The timestamp is to be interpreted identical to the timestamp in the
 	wl_pointer.axis event. The timestamp value may be the same as a
 	preceding wl_pointer.axis event. */
-	axis_stop : proc "c" (data: rawptr, pointer: ^pointer, time_: uint, axis_: pointer_axis),
+	axis_stop : proc "c" (data: rawptr, pointer_: ^pointer, time_: uint, axis_: pointer_axis),
 
 /* Discrete step information for scroll and other axes.
 
@@ -2075,7 +2077,7 @@ pointer_listener :: struct {
 
 	The order of wl_pointer.axis_discrete and wl_pointer.axis_source is
 	not guaranteed. */
-	axis_discrete : proc "c" (data: rawptr, pointer: ^pointer, axis_: pointer_axis, discrete_: int),
+	axis_discrete : proc "c" (data: rawptr, pointer_: ^pointer, axis_: pointer_axis, discrete_: int),
 
 /* Discrete high-resolution scroll information.
 
@@ -2098,7 +2100,7 @@ pointer_listener :: struct {
 
 	The order of wl_pointer.axis_value120 and wl_pointer.axis_source is
 	not guaranteed. */
-	axis_value120 : proc "c" (data: rawptr, pointer: ^pointer, axis_: pointer_axis, value120_: int),
+	axis_value120 : proc "c" (data: rawptr, pointer_: ^pointer, axis_: pointer_axis, value120_: int),
 
 /* Relative directional information of the entity causing the axis
 	motion.
@@ -2135,7 +2137,7 @@ pointer_listener :: struct {
 	The order of wl_pointer.axis_relative_direction,
 	wl_pointer.axis_discrete and wl_pointer.axis_source is not
 	guaranteed. */
-	axis_relative_direction : proc "c" (data: rawptr, pointer: ^pointer, axis_: pointer_axis, direction_: pointer_axis_relative_direction),
+	axis_relative_direction : proc "c" (data: rawptr, pointer_: ^pointer, axis_: pointer_axis, direction_: pointer_axis_relative_direction),
 
 }
 pointer_add_listener :: proc "contextless" (pointer_: ^pointer, listener: ^pointer_listener, data: rawptr) {
@@ -2245,7 +2247,7 @@ keyboard_listener :: struct {
 
 	From version 7 onwards, the fd must be mapped with MAP_PRIVATE by
 	the recipient, as MAP_SHARED may fail. */
-	keymap : proc "c" (data: rawptr, keyboard: ^keyboard, format_: keyboard_keymap_format, fd_: int, size_: uint),
+	keymap : proc "c" (data: rawptr, keyboard_: ^keyboard, format_: keyboard_keymap_format, fd_: int, size_: uint),
 
 /* Notification that this seat's keyboard focus is on a certain
 	surface.
@@ -2260,7 +2262,7 @@ keyboard_listener :: struct {
 
 	Clients should not use the list of pressed keys to emulate key-press
 	events. The order of keys in the list is unspecified. */
-	enter : proc "c" (data: rawptr, keyboard: ^keyboard, serial_: uint, surface_: ^surface, keys_: array),
+	enter : proc "c" (data: rawptr, keyboard_: ^keyboard, serial_: uint, surface_: ^surface, keys_: array),
 
 /* Notification that this seat's keyboard focus is no longer on
 	a certain surface.
@@ -2272,7 +2274,7 @@ keyboard_listener :: struct {
 	defaults. The compositor must not send this event if the active surface
 	of the wl_keyboard was not equal to the surface argument immediately
 	before this event. */
-	leave : proc "c" (data: rawptr, keyboard: ^keyboard, serial_: uint, surface_: ^surface),
+	leave : proc "c" (data: rawptr, keyboard_: ^keyboard, serial_: uint, surface_: ^surface),
 
 /* A key was pressed or released.
 	The time argument is a timestamp with millisecond
@@ -2297,7 +2299,7 @@ keyboard_listener :: struct {
 	key state when a wl_keyboard.repeat_info event with a rate argument of
 	0 has been received. This allows the compositor to take over the
 	responsibility of key repetition. */
-	key : proc "c" (data: rawptr, keyboard: ^keyboard, serial_: uint, time_: uint, key_: uint, state_: keyboard_key_state),
+	key : proc "c" (data: rawptr, keyboard_: ^keyboard, serial_: uint, time_: uint, key_: uint, state_: keyboard_key_state),
 
 /* Notifies clients that the modifier and/or group state has
 	changed, and it should update its local state.
@@ -2312,7 +2314,7 @@ keyboard_listener :: struct {
 
 	In the wl_keyboard logical state, this event updates the modifiers and
 	group. */
-	modifiers : proc "c" (data: rawptr, keyboard: ^keyboard, serial_: uint, mods_depressed_: uint, mods_latched_: uint, mods_locked_: uint, group_: uint),
+	modifiers : proc "c" (data: rawptr, keyboard_: ^keyboard, serial_: uint, mods_depressed_: uint, mods_latched_: uint, mods_locked_: uint, group_: uint),
 
 /* Informs the client about the keyboard's repeat rate and delay.
 
@@ -2326,7 +2328,7 @@ keyboard_listener :: struct {
 	This event can be sent later on as well with a new value if necessary,
 	so clients should continue listening for the event past the creation
 	of wl_keyboard. */
-	repeat_info : proc "c" (data: rawptr, keyboard: ^keyboard, rate_: int, delay_: int),
+	repeat_info : proc "c" (data: rawptr, keyboard_: ^keyboard, rate_: int, delay_: int),
 
 }
 keyboard_add_listener :: proc "contextless" (keyboard_: ^keyboard, listener: ^keyboard_listener, data: rawptr) {
@@ -2401,15 +2403,15 @@ touch_listener :: struct {
 	assigned a unique ID. Future events from this touch point reference
 	this ID. The ID ceases to be valid after a touch up event and may be
 	reused in the future. */
-	down : proc "c" (data: rawptr, touch: ^touch, serial_: uint, time_: uint, surface_: ^surface, id_: int, x_: fixed_t, y_: fixed_t),
+	down : proc "c" (data: rawptr, touch_: ^touch, serial_: uint, time_: uint, surface_: ^surface, id_: int, x_: fixed_t, y_: fixed_t),
 
 /* The touch point has disappeared. No further events will be sent for
 	this touch point and the touch point's ID is released and may be
 	reused in a future touch down event. */
-	up : proc "c" (data: rawptr, touch: ^touch, serial_: uint, time_: uint, id_: int),
+	up : proc "c" (data: rawptr, touch_: ^touch, serial_: uint, time_: uint, id_: int),
 
 /* A touch point has changed coordinates. */
-	motion : proc "c" (data: rawptr, touch: ^touch, time_: uint, id_: int, x_: fixed_t, y_: fixed_t),
+	motion : proc "c" (data: rawptr, touch_: ^touch, time_: uint, id_: int, x_: fixed_t, y_: fixed_t),
 
 /* Indicates the end of a set of events that logically belong together.
 	A client is expected to accumulate the data in all events within the
@@ -2419,7 +2421,7 @@ touch_listener :: struct {
 	guarantee is provided about the set of events within a frame. A client
 	must assume that any state not updated in a frame is unchanged from the
 	previously known state. */
-	frame : proc "c" (data: rawptr, touch: ^touch),
+	frame : proc "c" (data: rawptr, touch_: ^touch),
 
 /* Sent if the compositor decides the touch stream is a global
 	gesture. No further events are sent to the clients from that
@@ -2429,7 +2431,7 @@ touch_listener :: struct {
 	this surface may reuse the touch point ID.
 
 	No frame event is required after the cancel event. */
-	cancel : proc "c" (data: rawptr, touch: ^touch),
+	cancel : proc "c" (data: rawptr, touch_: ^touch),
 
 /* Sent when a touchpoint has changed its shape.
 
@@ -2456,7 +2458,7 @@ touch_listener :: struct {
 	This event is only sent by the compositor if the touch device supports
 	shape reports. The client has to make reasonable assumptions about the
 	shape if it did not receive this event. */
-	shape : proc "c" (data: rawptr, touch: ^touch, id_: int, major_: fixed_t, minor_: fixed_t),
+	shape : proc "c" (data: rawptr, touch_: ^touch, id_: int, major_: fixed_t, minor_: fixed_t),
 
 /* Sent when a touchpoint has changed its orientation.
 
@@ -2481,7 +2483,7 @@ touch_listener :: struct {
 
 	This event is only sent by the compositor if the touch device supports
 	orientation reports. */
-	orientation : proc "c" (data: rawptr, touch: ^touch, id_: int, orientation_: fixed_t),
+	orientation : proc "c" (data: rawptr, touch_: ^touch, id_: int, orientation_: fixed_t),
 
 }
 touch_add_listener :: proc "contextless" (touch_: ^touch, listener: ^touch_listener, data: rawptr) {
@@ -2552,7 +2554,7 @@ output_listener :: struct {
 	outputs, might fake this information. Instead of using x and y, clients
 	should use xdg_output.logical_position. Instead of using make and model,
 	clients should use name and description. */
-	geometry : proc "c" (data: rawptr, output: ^output, x_: int, y_: int, physical_width_: int, physical_height_: int, subpixel_: output_subpixel, make_: cstring, model_: cstring, transform_: output_transform),
+	geometry : proc "c" (data: rawptr, output_: ^output, x_: int, y_: int, physical_width_: int, physical_height_: int, subpixel_: output_subpixel, make_: cstring, model_: cstring, transform_: output_transform),
 
 /* The mode event describes an available mode for the output.
 
@@ -2587,14 +2589,14 @@ output_listener :: struct {
 	Note: this information is not always meaningful for all outputs. Some
 	compositors, such as those exposing virtual outputs, might fake the
 	refresh rate or the size. */
-	mode : proc "c" (data: rawptr, output: ^output, flags_: output_mode, width_: int, height_: int, refresh_: int),
+	mode : proc "c" (data: rawptr, output_: ^output, flags_: output_mode_flags, width_: int, height_: int, refresh_: int),
 
 /* This event is sent after all other properties have been
 	sent after binding to the output object and after any
 	other property changes done after that. This allows
 	changes to the output properties to be seen as
 	atomic, even if they happen via multiple events. */
-	done : proc "c" (data: rawptr, output: ^output),
+	done : proc "c" (data: rawptr, output_: ^output),
 
 /* This event contains scaling geometry information
 	that is not in the geometry event. It may be sent after
@@ -2614,7 +2616,7 @@ output_listener :: struct {
 	scale to use for a surface.
 
 	The scale event will be followed by a done event. */
-	scale : proc "c" (data: rawptr, output: ^output, factor_: int),
+	scale : proc "c" (data: rawptr, output_: ^output, factor_: int),
 
 /* Many compositors will assign user-friendly names to their outputs, show
 	them to the user, allow the user to refer to an output, etc. The client
@@ -2644,7 +2646,7 @@ output_listener :: struct {
 	same name if possible.
 
 	The name event will be followed by a done event. */
-	name : proc "c" (data: rawptr, output: ^output, name_: cstring),
+	name : proc "c" (data: rawptr, output_: ^output, name_: cstring),
 
 /* Many compositors can produce human-readable descriptions of their
 	outputs. The client may wish to know this description as well, e.g. for
@@ -2660,7 +2662,7 @@ output_listener :: struct {
 	not be sent at all.
 
 	The description event will be followed by a done event. */
-	description : proc "c" (data: rawptr, output: ^output, description_: cstring),
+	description : proc "c" (data: rawptr, output_: ^output, description_: cstring),
 
 }
 output_add_listener :: proc "contextless" (output_: ^output, listener: ^output_listener, data: rawptr) {
@@ -2699,9 +2701,10 @@ output_transform :: enum {
 /* These flags describe properties of an output mode.
 	They are used in the flags bitfield of the mode event. */
 output_mode :: enum {
-	current = 0x1,
-	preferred = 0x2,
+	current = 0,
+	preferred = 1,
 }
+output_mode_flags :: bit_set[output_mode; u32]
 @(private)
 output_requests := []message {
 	{"release", "3", raw_data(wayland_types)[0:]},

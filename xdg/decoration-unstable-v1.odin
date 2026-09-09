@@ -130,7 +130,7 @@ toplevel_decoration_v1_listener :: struct {
 
         A configure event can be sent at any time. The specified mode must be
         obeyed by the client. */
-	configure : proc "c" (data: rawptr, toplevel_decoration_v1: ^toplevel_decoration_v1, mode_: toplevel_decoration_v1_mode),
+	configure : proc "c" (data: rawptr, toplevel_decoration_v1_: ^toplevel_decoration_v1, mode_: toplevel_decoration_v1_mode),
 
 }
 toplevel_decoration_v1_add_listener :: proc "contextless" (toplevel_decoration_v1_: ^toplevel_decoration_v1, listener: ^toplevel_decoration_v1_listener, data: rawptr) {

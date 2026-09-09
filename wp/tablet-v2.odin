@@ -86,13 +86,13 @@ tablet_seat_v2_listener :: struct {
 	seat. This event only provides the object id of the tablet, any
 	static information about the tablet (device name, vid/pid, etc.) is
 	sent through the wp_tablet interface. */
-	tablet_added : proc "c" (data: rawptr, tablet_seat_v2: ^tablet_seat_v2) -> ^tablet_v2,
+	tablet_added : proc "c" (data: rawptr, tablet_seat_v2_: ^tablet_seat_v2, id_: ^tablet_v2),
 
 /* This event is sent whenever a tool that has not previously been used
 	with a tablet comes into use. This event only provides the object id
 	of the tool; any static information about the tool (capabilities,
 	type, etc.) is sent through the wp_tablet_tool interface. */
-	tool_added : proc "c" (data: rawptr, tablet_seat_v2: ^tablet_seat_v2) -> ^tablet_tool_v2,
+	tool_added : proc "c" (data: rawptr, tablet_seat_v2_: ^tablet_seat_v2, id_: ^tablet_tool_v2),
 
 /* This event is sent whenever a new pad is known to the system. Typically,
 	pads are physically attached to tablets and a pad_added event is
@@ -104,7 +104,7 @@ tablet_seat_v2_listener :: struct {
 	This event only provides the object id of the pad. All further
 	features (buttons, strips, rings) are sent through the wp_tablet_pad
 	interface. */
-	pad_added : proc "c" (data: rawptr, tablet_seat_v2: ^tablet_seat_v2) -> ^tablet_pad_v2,
+	pad_added : proc "c" (data: rawptr, tablet_seat_v2_: ^tablet_seat_v2, id_: ^tablet_pad_v2),
 
 }
 tablet_seat_v2_add_listener :: proc "contextless" (tablet_seat_v2_: ^tablet_seat_v2, listener: ^tablet_seat_v2_listener, data: rawptr) {
@@ -200,7 +200,7 @@ tablet_tool_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
 	wp_tablet_tool.done event. */
-	type : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, tool_type_: tablet_tool_v2_type),
+	type : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, tool_type_: tablet_tool_v2_type),
 
 /* If the physical tool can be identified by a unique 64-bit serial
 	number, this event notifies the client of this serial number.
@@ -217,7 +217,7 @@ tablet_tool_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
 	wp_tablet_tool.done event. */
-	hardware_serial : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, hardware_serial_hi_: uint, hardware_serial_lo_: uint),
+	hardware_serial : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, hardware_serial_hi_: uint, hardware_serial_lo_: uint),
 
 /* This event notifies the client of a hardware id available on this tool.
 
@@ -229,7 +229,7 @@ tablet_tool_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
 	wp_tablet_tool.done event. */
-	hardware_id_wacom : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, hardware_id_hi_: uint, hardware_id_lo_: uint),
+	hardware_id_wacom : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, hardware_id_hi_: uint, hardware_id_lo_: uint),
 
 /* This event notifies the client of any capabilities of this tool,
 	beyond the main set of x/y axes and tip up/down detection.
@@ -238,12 +238,12 @@ tablet_tool_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
 	wp_tablet_tool.done event. */
-	capability : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, capability_: tablet_tool_v2_capability),
+	capability : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, capability_: tablet_tool_v2_capability),
 
 /* This event signals the end of the initial burst of descriptive
 	events. A client may consider the static description of the tool to
 	be complete and finalize initialization of the tool. */
-	done : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2),
+	done : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2),
 
 /* This event is sent when the tool is removed from the system and will
 	send no further events. Should the physical tool come back into
@@ -259,7 +259,7 @@ tablet_tool_v2_listener :: struct {
 
 	When this event is received, the client must wp_tablet_tool.destroy
 	the object. */
-	removed : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2),
+	removed : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2),
 
 /* Notification that this tool is focused on a certain surface.
 
@@ -270,7 +270,7 @@ tablet_tool_v2_listener :: struct {
 	If any button is logically down when the tool comes into proximity,
 	the respective button event is sent after the proximity_in event but
 	within the same frame as the proximity_in event. */
-	proximity_in : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, serial_: uint, tablet_: ^tablet_v2, surface_: ^wl.surface),
+	proximity_in : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, serial_: uint, tablet_: ^tablet_v2, surface_: ^wl.surface),
 
 /* Notification that this tool has either left proximity, or is no
 	longer focused on a certain surface.
@@ -284,7 +284,7 @@ tablet_tool_v2_listener :: struct {
 	changes from one surface to another, a button release event may not
 	be sent until the button is actually released or the tool leaves the
 	proximity of the tablet. */
-	proximity_out : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2),
+	proximity_out : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2),
 
 /* Sent whenever the tablet tool comes in contact with the surface of the
 	tablet.
@@ -298,7 +298,7 @@ tablet_tool_v2_listener :: struct {
 	contact. On some devices, a compositor may not consider a tool in
 	logical contact until a minimum physical pressure threshold is
 	exceeded. */
-	down : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, serial_: uint),
+	down : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, serial_: uint),
 
 /* Sent whenever the tablet tool stops making contact with the surface of
 	the tablet, or when the tablet tool moves out of the input region
@@ -316,42 +316,42 @@ tablet_tool_v2_listener :: struct {
 	contact. On some devices, a compositor may not consider a tool out
 	of logical contact until physical pressure falls below a specific
 	threshold. */
-	up : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2),
+	up : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2),
 
 /* Sent whenever a tablet tool moves. */
-	motion : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, x_: fixed_t, y_: fixed_t),
+	motion : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, x_: fixed_t, y_: fixed_t),
 
 /* Sent whenever the pressure axis on a tool changes. The value of this
 	event is normalized to a value between 0 and 65535.
 
 	Note that pressure may be nonzero even when a tool is not in logical
 	contact. See the down and up events for more details. */
-	pressure : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, pressure_: uint),
+	pressure : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, pressure_: uint),
 
 /* Sent whenever the distance axis on a tool changes. The value of this
 	event is normalized to a value between 0 and 65535.
 
 	Note that distance may be nonzero even when a tool is not in logical
 	contact. See the down and up events for more details. */
-	distance : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, distance_: uint),
+	distance : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, distance_: uint),
 
 /* Sent whenever one or both of the tilt axes on a tool change. Each tilt
 	value is in degrees, relative to the z-axis of the tablet.
 	The angle is positive when the top of a tool tilts along the
 	positive x or y axis. */
-	tilt : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, tilt_x_: fixed_t, tilt_y_: fixed_t),
+	tilt : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, tilt_x_: fixed_t, tilt_y_: fixed_t),
 
 /* Sent whenever the z-rotation axis on the tool changes. The
 	rotation value is in degrees clockwise from the tool's
 	logical neutral position. */
-	rotation : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, degrees_: fixed_t),
+	rotation : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, degrees_: fixed_t),
 
 /* Sent whenever the slider position on the tool changes. The
 	value is normalized between -65535 and 65535, with 0 as the logical
 	neutral position of the slider.
 
 	The slider is available on e.g. the Wacom Airbrush tool. */
-	slider : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, position_: int),
+	slider : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, position_: int),
 
 /* Sent whenever the wheel on the tool emits an event. This event
 	contains two values for the same axis change. The degrees value is
@@ -365,7 +365,7 @@ tablet_tool_v2_listener :: struct {
 	click and emulate click events when a certain threshold is met.
 	Thus, wl_tablet_tool.wheel events with non-zero clicks values may
 	have different degrees values. */
-	wheel : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, degrees_: fixed_t, clicks_: int),
+	wheel : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, degrees_: fixed_t, clicks_: int),
 
 /* Sent whenever a button on the tool is pressed or released.
 
@@ -373,13 +373,13 @@ tablet_tool_v2_listener :: struct {
 	button events are generated by the compositor. See
 	wp_tablet_tool.proximity_in and wp_tablet_tool.proximity_out for
 	details. */
-	button : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, serial_: uint, button_: uint, state_: tablet_tool_v2_button_state),
+	button : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, serial_: uint, button_: uint, state_: tablet_tool_v2_button_state),
 
 /* Marks the end of a series of axis and/or button updates from the
 	tablet. The Wayland protocol requires axis updates to be sent
 	sequentially, however all events within a frame should be considered
 	one hardware event. */
-	frame : proc "c" (data: rawptr, tablet_tool_v2: ^tablet_tool_v2, time_: uint),
+	frame : proc "c" (data: rawptr, tablet_tool_v2_: ^tablet_tool_v2, time_: uint),
 
 }
 tablet_tool_v2_add_listener :: proc "contextless" (tablet_tool_v2_: ^tablet_tool_v2, listener: ^tablet_tool_v2_listener, data: rawptr) {
@@ -486,7 +486,7 @@ tablet_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
         wp_tablet.done event. */
-	name : proc "c" (data: rawptr, tablet_v2: ^tablet_v2, name_: cstring),
+	name : proc "c" (data: rawptr, tablet_v2_: ^tablet_v2, name_: cstring),
 
 /* The vendor and product IDs for the tablet device.
 
@@ -500,7 +500,7 @@ tablet_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
 	wp_tablet.done event. */
-	id : proc "c" (data: rawptr, tablet_v2: ^tablet_v2, vid_: uint, pid_: uint),
+	id : proc "c" (data: rawptr, tablet_v2_: ^tablet_v2, vid_: uint, pid_: uint),
 
 /* A system-specific device path that indicates which device is behind
 	this wp_tablet. This information may be used to gather additional
@@ -516,20 +516,20 @@ tablet_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
 	wp_tablet.done event. */
-	path : proc "c" (data: rawptr, tablet_v2: ^tablet_v2, path_: cstring),
+	path : proc "c" (data: rawptr, tablet_v2_: ^tablet_v2, path_: cstring),
 
 /* This event is sent immediately to signal the end of the initial
 	burst of descriptive events. A client may consider the static
 	description of the tablet to be complete and finalize initialization
 	of the tablet. */
-	done : proc "c" (data: rawptr, tablet_v2: ^tablet_v2),
+	done : proc "c" (data: rawptr, tablet_v2_: ^tablet_v2),
 
 /* Sent when the tablet has been removed from the system. When a tablet
 	is removed, some tools may be removed.
 
 	When this event is received, the client must wp_tablet.destroy
 	the object. */
-	removed : proc "c" (data: rawptr, tablet_v2: ^tablet_v2),
+	removed : proc "c" (data: rawptr, tablet_v2_: ^tablet_v2),
 
 /* The bustype argument is one of the BUS_ defines in the Linux kernel's
 	linux/input.h
@@ -539,7 +539,7 @@ tablet_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
 	wp_tablet.done event. */
-	bustype : proc "c" (data: rawptr, tablet_v2: ^tablet_v2, bustype_: tablet_v2_bustype),
+	bustype : proc "c" (data: rawptr, tablet_v2_: ^tablet_v2, bustype_: tablet_v2_bustype),
 
 }
 tablet_v2_add_listener :: proc "contextless" (tablet_v2_: ^tablet_v2, listener: ^tablet_v2_listener, data: rawptr) {
@@ -627,13 +627,13 @@ tablet_pad_ring_v2_listener :: struct {
 
 	This event is optional. If the source is unknown for an interaction,
 	no event is sent. */
-	source : proc "c" (data: rawptr, tablet_pad_ring_v2: ^tablet_pad_ring_v2, source_: tablet_pad_ring_v2_source),
+	source : proc "c" (data: rawptr, tablet_pad_ring_v2_: ^tablet_pad_ring_v2, source_: tablet_pad_ring_v2_source),
 
 /* Sent whenever the angle on a ring changes.
 
 	The angle is provided in degrees clockwise from the logical
 	north of the ring in the pad's current rotation. */
-	angle : proc "c" (data: rawptr, tablet_pad_ring_v2: ^tablet_pad_ring_v2, degrees_: fixed_t),
+	angle : proc "c" (data: rawptr, tablet_pad_ring_v2_: ^tablet_pad_ring_v2, degrees_: fixed_t),
 
 /* Stop notification for ring events.
 
@@ -645,7 +645,7 @@ tablet_pad_ring_v2_listener :: struct {
 
 	Any wp_tablet_pad_ring.angle events with the same source after this
 	event should be considered as the start of a new interaction. */
-	stop : proc "c" (data: rawptr, tablet_pad_ring_v2: ^tablet_pad_ring_v2),
+	stop : proc "c" (data: rawptr, tablet_pad_ring_v2_: ^tablet_pad_ring_v2),
 
 /* Indicates the end of a set of ring events that logically belong
 	together. A client is expected to accumulate the data in all events
@@ -660,7 +660,7 @@ tablet_pad_ring_v2_listener :: struct {
 	group, even if the group only contains a single wp_tablet_pad_ring
 	event. Specifically, a client may get a sequence: angle, frame,
 	angle, frame, etc. */
-	frame : proc "c" (data: rawptr, tablet_pad_ring_v2: ^tablet_pad_ring_v2, time_: uint),
+	frame : proc "c" (data: rawptr, tablet_pad_ring_v2_: ^tablet_pad_ring_v2, time_: uint),
 
 }
 tablet_pad_ring_v2_add_listener :: proc "contextless" (tablet_pad_ring_v2_: ^tablet_pad_ring_v2, listener: ^tablet_pad_ring_v2_listener, data: rawptr) {
@@ -746,14 +746,14 @@ tablet_pad_strip_v2_listener :: struct {
 
 	This event is optional. If the source is unknown for an interaction,
 	no event is sent. */
-	source : proc "c" (data: rawptr, tablet_pad_strip_v2: ^tablet_pad_strip_v2, source_: tablet_pad_strip_v2_source),
+	source : proc "c" (data: rawptr, tablet_pad_strip_v2_: ^tablet_pad_strip_v2, source_: tablet_pad_strip_v2_source),
 
 /* Sent whenever the position on a strip changes.
 
 	The position is normalized to a range of [0, 65535], the 0-value
 	represents the top-most and/or left-most position of the strip in
 	the pad's current rotation. */
-	position : proc "c" (data: rawptr, tablet_pad_strip_v2: ^tablet_pad_strip_v2, position_: uint),
+	position : proc "c" (data: rawptr, tablet_pad_strip_v2_: ^tablet_pad_strip_v2, position_: uint),
 
 /* Stop notification for strip events.
 
@@ -765,7 +765,7 @@ tablet_pad_strip_v2_listener :: struct {
 
 	Any wp_tablet_pad_strip.position events with the same source after this
 	event should be considered as the start of a new interaction. */
-	stop : proc "c" (data: rawptr, tablet_pad_strip_v2: ^tablet_pad_strip_v2),
+	stop : proc "c" (data: rawptr, tablet_pad_strip_v2_: ^tablet_pad_strip_v2),
 
 /* Indicates the end of a set of events that represent one logical
 	hardware strip event. A client is expected to accumulate the data
@@ -781,7 +781,7 @@ tablet_pad_strip_v2_listener :: struct {
 	group, even if the group only contains a single wp_tablet_pad_strip
 	event. Specifically, a client may get a sequence: position, frame,
 	position, frame, etc. */
-	frame : proc "c" (data: rawptr, tablet_pad_strip_v2: ^tablet_pad_strip_v2, time_: uint),
+	frame : proc "c" (data: rawptr, tablet_pad_strip_v2_: ^tablet_pad_strip_v2, time_: uint),
 
 }
 tablet_pad_strip_v2_add_listener :: proc "contextless" (tablet_pad_strip_v2_: ^tablet_pad_strip_v2, listener: ^tablet_pad_strip_v2_listener, data: rawptr) {
@@ -860,21 +860,21 @@ tablet_pad_group_v2_listener :: struct {
 	event in the case of changes to the mapping of these reserved buttons.
 	If the compositor happens to reserve all buttons in a group, this event
 	will be sent with an empty array. */
-	buttons : proc "c" (data: rawptr, tablet_pad_group_v2: ^tablet_pad_group_v2, buttons_: array),
+	buttons : proc "c" (data: rawptr, tablet_pad_group_v2_: ^tablet_pad_group_v2, buttons_: array),
 
 /* Sent on wp_tablet_pad_group initialization to announce available rings.
 	One event is sent for each ring available on this pad group.
 
 	This event is sent in the initial burst of events before the
 	wp_tablet_pad_group.done event. */
-	ring : proc "c" (data: rawptr, tablet_pad_group_v2: ^tablet_pad_group_v2) -> ^tablet_pad_ring_v2,
+	ring : proc "c" (data: rawptr, tablet_pad_group_v2_: ^tablet_pad_group_v2, ring_: ^tablet_pad_ring_v2),
 
 /* Sent on wp_tablet_pad initialization to announce available strips.
 	One event is sent for each strip available on this pad group.
 
 	This event is sent in the initial burst of events before the
 	wp_tablet_pad_group.done event. */
-	strip : proc "c" (data: rawptr, tablet_pad_group_v2: ^tablet_pad_group_v2) -> ^tablet_pad_strip_v2,
+	strip : proc "c" (data: rawptr, tablet_pad_group_v2_: ^tablet_pad_group_v2, strip_: ^tablet_pad_strip_v2),
 
 /* Sent on wp_tablet_pad_group initialization to announce that the pad
 	group may switch between modes. A client may use a mode to store a
@@ -888,13 +888,13 @@ tablet_pad_group_v2_listener :: struct {
 	This event is sent in the initial burst of events before the
 	wp_tablet_pad_group.done event. This event is only sent when more than
 	more than one mode is available. */
-	modes : proc "c" (data: rawptr, tablet_pad_group_v2: ^tablet_pad_group_v2, modes_: uint),
+	modes : proc "c" (data: rawptr, tablet_pad_group_v2_: ^tablet_pad_group_v2, modes_: uint),
 
 /* This event is sent immediately to signal the end of the initial
 	burst of descriptive events. A client may consider the static
 	description of the tablet to be complete and finalize initialization
 	of the tablet group. */
-	done : proc "c" (data: rawptr, tablet_pad_group_v2: ^tablet_pad_group_v2),
+	done : proc "c" (data: rawptr, tablet_pad_group_v2_: ^tablet_pad_group_v2),
 
 /* Notification that the mode was switched.
 
@@ -923,14 +923,14 @@ tablet_pad_group_v2_listener :: struct {
 	in the previous mode, the client should immediately issue a
 	wp_tablet_ring.set_feedback, wp_tablet_strip.set_feedback or
 	wp_tablet_dial.set_feedback request for each changed ring, strip or dial. */
-	mode_switch : proc "c" (data: rawptr, tablet_pad_group_v2: ^tablet_pad_group_v2, time_: uint, serial_: uint, mode_: uint),
+	mode_switch : proc "c" (data: rawptr, tablet_pad_group_v2_: ^tablet_pad_group_v2, time_: uint, serial_: uint, mode_: uint),
 
 /* Sent on wp_tablet_pad initialization to announce available dials.
 	One event is sent for each dial available on this pad group.
 
 	This event is sent in the initial burst of events before the
 	wp_tablet_pad_group.done event. */
-	dial : proc "c" (data: rawptr, tablet_pad_group_v2: ^tablet_pad_group_v2) -> ^tablet_pad_dial_v2,
+	dial : proc "c" (data: rawptr, tablet_pad_group_v2_: ^tablet_pad_group_v2, dial_: ^tablet_pad_dial_v2),
 
 }
 tablet_pad_group_v2_add_listener :: proc "contextless" (tablet_pad_group_v2_: ^tablet_pad_group_v2, listener: ^tablet_pad_group_v2_listener, data: rawptr) {
@@ -1027,7 +1027,7 @@ tablet_pad_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
 	wp_tablet_pad.done event. At least one group will be announced. */
-	group : proc "c" (data: rawptr, tablet_pad_v2: ^tablet_pad_v2) -> ^tablet_pad_group_v2,
+	group : proc "c" (data: rawptr, tablet_pad_v2_: ^tablet_pad_v2, pad_group_: ^tablet_pad_group_v2),
 
 /* A system-specific device path that indicates which device is behind
 	this wp_tablet_pad. This information may be used to gather additional
@@ -1039,7 +1039,7 @@ tablet_pad_v2_listener :: struct {
 
 	This event is sent in the initial burst of events before the
 	wp_tablet_pad.done event. */
-	path : proc "c" (data: rawptr, tablet_pad_v2: ^tablet_pad_v2, path_: cstring),
+	path : proc "c" (data: rawptr, tablet_pad_v2_: ^tablet_pad_v2, path_: cstring),
 
 /* Sent on wp_tablet_pad initialization to announce the available
 	buttons.
@@ -1047,22 +1047,22 @@ tablet_pad_v2_listener :: struct {
 	This event is sent in the initial burst of events before the
 	wp_tablet_pad.done event. This event is only sent when at least one
 	button is available. */
-	buttons : proc "c" (data: rawptr, tablet_pad_v2: ^tablet_pad_v2, buttons_: uint),
+	buttons : proc "c" (data: rawptr, tablet_pad_v2_: ^tablet_pad_v2, buttons_: uint),
 
 /* This event signals the end of the initial burst of descriptive
 	events. A client may consider the static description of the pad to
 	be complete and finalize initialization of the pad. */
-	done : proc "c" (data: rawptr, tablet_pad_v2: ^tablet_pad_v2),
+	done : proc "c" (data: rawptr, tablet_pad_v2_: ^tablet_pad_v2),
 
 /* Sent whenever the physical state of a button changes. */
-	button : proc "c" (data: rawptr, tablet_pad_v2: ^tablet_pad_v2, time_: uint, button_: uint, state_: tablet_pad_v2_button_state),
+	button : proc "c" (data: rawptr, tablet_pad_v2_: ^tablet_pad_v2, time_: uint, button_: uint, state_: tablet_pad_v2_button_state),
 
 /* Notification that this pad is focused on the specified surface. */
-	enter : proc "c" (data: rawptr, tablet_pad_v2: ^tablet_pad_v2, serial_: uint, tablet_: ^tablet_v2, surface_: ^wl.surface),
+	enter : proc "c" (data: rawptr, tablet_pad_v2_: ^tablet_pad_v2, serial_: uint, tablet_: ^tablet_v2, surface_: ^wl.surface),
 
 /* Notification that this pad is no longer focused on the specified
 	surface. */
-	leave : proc "c" (data: rawptr, tablet_pad_v2: ^tablet_pad_v2, serial_: uint, surface_: ^wl.surface),
+	leave : proc "c" (data: rawptr, tablet_pad_v2_: ^tablet_pad_v2, serial_: uint, surface_: ^wl.surface),
 
 /* Sent when the pad has been removed from the system. When a tablet
 	is removed its pad(s) will be removed too.
@@ -1070,7 +1070,7 @@ tablet_pad_v2_listener :: struct {
 	When this event is received, the client must destroy all rings, strips
 	and groups that were offered by this pad, and issue wp_tablet_pad.destroy
 	the pad itself. */
-	removed : proc "c" (data: rawptr, tablet_pad_v2: ^tablet_pad_v2),
+	removed : proc "c" (data: rawptr, tablet_pad_v2_: ^tablet_pad_v2),
 
 }
 tablet_pad_v2_add_listener :: proc "contextless" (tablet_pad_v2_: ^tablet_pad_v2, listener: ^tablet_pad_v2_listener, data: rawptr) {
@@ -1156,7 +1156,7 @@ tablet_pad_dial_v2_listener :: struct {
 	same hardware event. See the wl_pointer.axis_value120 for more details.
 
 	The value120 must not be zero. */
-	delta : proc "c" (data: rawptr, tablet_pad_dial_v2: ^tablet_pad_dial_v2, value120_: int),
+	delta : proc "c" (data: rawptr, tablet_pad_dial_v2_: ^tablet_pad_dial_v2, value120_: int),
 
 /* Indicates the end of a set of events that represent one logical
 	hardware dial event. A client is expected to accumulate the data
@@ -1169,7 +1169,7 @@ tablet_pad_dial_v2_listener :: struct {
 	group, even if the group only contains a single wp_tablet_pad_dial
 	event. Specifically, a client may get a sequence: delta, frame,
 	delta, frame, etc. */
-	frame : proc "c" (data: rawptr, tablet_pad_dial_v2: ^tablet_pad_dial_v2, time_: uint),
+	frame : proc "c" (data: rawptr, tablet_pad_dial_v2_: ^tablet_pad_dial_v2, time_: uint),
 
 }
 tablet_pad_dial_v2_add_listener :: proc "contextless" (tablet_pad_dial_v2_: ^tablet_pad_dial_v2, listener: ^tablet_pad_dial_v2_listener, data: rawptr) {

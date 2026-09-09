@@ -6,6 +6,7 @@ import "core:strings"
 import "core:flags"
 import "core:os"
 import "core:path/filepath"
+import "core:strconv"
 
 Procedure_Type :: enum {
    Request,
@@ -32,7 +33,8 @@ Enum_Entry :: struct {
 Enumeration :: struct {
    name: string,
    description: string,
-   entries: []Enum_Entry
+   entries: []Enum_Entry,
+   is_bitfield: bool,
 }
 
 Interface :: struct {
@@ -232,7 +234,7 @@ get_procedures_text :: proc(procedures: []Procedure, var_name: string, protocol_
 
    return strings.to_string(sb)
 }
-get_argument_text :: proc(arg: Argument, force_name := false) -> string {
+get_argument_text :: proc(arg: Argument, protocol: Protocol, force_name := false) -> string {
    sb: strings.Builder
    forward_text: string
    ret := false
@@ -249,6 +251,9 @@ get_argument_text :: proc(arg: Argument, force_name := false) -> string {
          }
       case .Enum:
          forward_text = arg.enum_name
+         if is_bitfield_enum(protocol, arg.enum_name) {
+            forward_text = fmt.aprintf("%v_flags", arg.enum_name)
+         }
       case .Int, .Fd:
          forward_text = "i32"
       case .Unsigned:
@@ -306,7 +311,9 @@ parse_file :: proc(filename: string) -> Protocol {
             description = get_description(doc, enum_id),
 
          }
-         log.debug("\t","Enum:", enumeration.name)
+         value,found := find_attr(doc, enum_id, "bitfield")
+         enumeration.is_bitfield = false if !found else value == "true"
+         log.debug("\t","Enum:", enumeration.name, "bitfield:", enumeration.is_bitfield)
          entries : [dynamic]Enum_Entry
          for entry_id in iterate_child(doc, enum_id, "entry") {
             value, found := find_attr(doc, entry_id, "value")
@@ -321,8 +328,22 @@ parse_file :: proc(filename: string) -> Protocol {
                name = name,
                value = value
             }
-            append(&entries, entry)
-            log.debug("\t\tEntry:", entry.name)
+            if enumeration.is_bitfield {
+               // We want to skip entries that are not a single bit for bitfield.
+               // added because of resize in wayland.xml but it's deprecated and not parsed
+               v, ok := strconv.parse_uint(value)
+               if ok && ((v & (v-1)) == 0){
+                  // odin use the enum value to place it in the bit field
+                  // so we need to change it from 0,1,2,4 to 1,2,3 to get the correct value in the end,
+                  // we also remove none = 0 because it become {} (empty bit_set)
+                  entry.value = fmt.aprint(len(entries))
+                  append(&entries, entry)
+                  log.debug("\t\tEntry:", entry.name)
+               }
+            } else {
+               append(&entries, entry)
+               log.debug("\t\tEntry:", entry.name)
+            }
          }
          enumeration.entries = entries[:]
          append(&enums, enumeration)
@@ -385,9 +406,9 @@ generate_code :: proc(protocol: Protocol, package_name, output_path, wayland_dir
             fmt.sbprintfln(&sb,"%v :: %v",opcode_name, opcode)
 
             fmt.sbprintf(&sb, `%[0]v_%[1]v :: proc "contextless" (%[0]v_: ^%[0]v`, interface.name, request.name)
-            for arg in request.args do fmt.sbprintf(&sb, ", %v", get_argument_text(arg))
+            for arg in request.args do fmt.sbprintf(&sb, ", %v", get_argument_text(arg, protocol))
             fmt.sbprint(&sb, ") ")
-            return_type := get_argument_text(request.ret.?) if has_ret else "rawptr"
+            return_type := get_argument_text(request.ret.?, protocol) if has_ret else "rawptr"
 
             if has_ret || has_new_id do fmt.sbprintf(&sb,"-> %v ",return_type)
             fmt.sbprintln(&sb, "{")
@@ -429,10 +450,10 @@ generate_code :: proc(protocol: Protocol, package_name, output_path, wayland_dir
                fmt.sbprint(&sb, "\t")
                fmt.sbprintf(&sb,`%v : proc "c" (data: rawptr, %v_: ^%v`, event.name, interface.name, interface.name)
                for arg, i in event.args {
-                  fmt.sbprintf(&sb, ", %v",get_argument_text(arg, true))
+                  fmt.sbprintf(&sb, ", %v",get_argument_text(arg, protocol, true))
 
                }
-               if event.ret != nil do fmt.sbprintfln(&sb, ") -> %v,\n", get_argument_text(event.ret.?))
+               if event.ret != nil do fmt.sbprintfln(&sb, ") -> %v,\n", get_argument_text(event.ret.?, protocol))
                else do fmt.sbprintln(&sb, "),\n")
             }
             fmt.sbprintln(&sb, "}")
@@ -448,6 +469,9 @@ generate_code :: proc(protocol: Protocol, package_name, output_path, wayland_dir
                fmt.sbprintfln(&sb, "\t%v = %v,", entry.name, entry.value)
             }
             fmt.sbprintln(&sb, "}")
+            if enumeration.is_bitfield {
+               fmt.sbprintfln(&sb, "%v_%v_flags :: bit_set[%v_%v; u32]", interface.name, enumeration.name, interface.name, enumeration.name)
+            }
          }
 
          if len(interface.requests) > 0 {
@@ -628,4 +652,15 @@ main :: proc() {
    }
 
    fmt.println("Done")
+}
+
+is_bitfield_enum :: proc(protocol: Protocol, enum_type: string) -> bool {
+   for i in protocol.interfaces {
+      for e in i.enums {
+         if e.is_bitfield && enum_type == fmt.aprintf("%v_%v", i.name, e.name) {
+             return true
+         }
+      }
+   }
+   return false
 }
