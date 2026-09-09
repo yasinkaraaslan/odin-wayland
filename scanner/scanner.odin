@@ -245,14 +245,14 @@ get_argument_text :: proc(arg: Argument, force_name := false) -> string {
             ret = true
          }
          else {
-            forward_text = "^interface, version: uint"
+            forward_text = "^interface, version: u32"
          }
       case .Enum:
          forward_text = arg.enum_name
       case .Int, .Fd:
-         forward_text = "int"
+         forward_text = "i32"
       case .Unsigned:
-         forward_text = "uint"
+         forward_text = "u32"
       case .Fixed:
          forward_text = "fixed_t"
       case .String:
@@ -443,7 +443,7 @@ generate_code :: proc(protocol: Protocol, package_name, output_path, wayland_dir
          }
          for enumeration in interface.enums {
             fmt.sbprintln(&sb, "/*", enumeration.description, "*/")
-            fmt.sbprintfln(&sb, "%v_%v :: enum {{", interface.name, enumeration.name)
+            fmt.sbprintfln(&sb, "%v_%v :: enum i32 {{", interface.name, enumeration.name)
             for entry in enumeration.entries {
                fmt.sbprintfln(&sb, "\t%v = %v,", entry.name, entry.value)
             }
@@ -494,40 +494,40 @@ foreign wl_lib {
    display_connect                           :: proc(name: cstring) -> ^display ---
    display_connect_to_fd                     :: proc(fd: int) -> ^display ---
    display_disconnect                        :: proc(display: ^display) ---
-   display_get_fd                            :: proc(display: ^display) -> int ---
-   display_dispatch                          :: proc(display: ^display) -> int ---
-   display_dispatch_queue                    :: proc(display: ^display, queue: event_queue) -> int ---
-   display_dispatch_queue_pending            :: proc(display: ^display, queue: event_queue) -> int ---
-   display_dispatch_pending                  :: proc(display: ^display) -> int ---
-   display_get_error                         :: proc(display: ^display) -> int ---
+   display_get_fd                            :: proc(display: ^display) -> i32 ---
+   display_dispatch                          :: proc(display: ^display) -> i32 ---
+   display_dispatch_queue                    :: proc(display: ^display, queue: event_queue) -> i32 ---
+   display_dispatch_queue_pending            :: proc(display: ^display, queue: event_queue) -> i32 ---
+   display_dispatch_pending                  :: proc(display: ^display) -> i32 ---
+   display_get_error                         :: proc(display: ^display) -> i32 ---
    display_get_protocol_error                :: proc(display: ^display, intf: ^interface, id: ^u32) -> u32 ---
-   display_flush                             :: proc(display: ^display) -> int ---
-   display_roundtrip_queue                   :: proc(display: ^display, queue: ^event_queue) -> int ---
-   display_roundtrip                         :: proc(display: ^display) -> int ---
+   display_flush                             :: proc(display: ^display) -> i32 ---
+   display_roundtrip_queue                   :: proc(display: ^display, queue: ^event_queue) -> i32 ---
+   display_roundtrip                         :: proc(display: ^display) -> i32 ---
    display_create_queue                      :: proc(display: ^display) -> ^event_queue ---
-   display_prepare_read_queue                :: proc(display: ^display, queue: ^event_queue) -> int ---
-   display_prepare_read                      :: proc(display: ^display) -> int ---
+   display_prepare_read_queue                :: proc(display: ^display, queue: ^event_queue) -> i32 ---
+   display_prepare_read                      :: proc(display: ^display) -> i32 ---
    display_cancel_read                       :: proc(display: ^display) ---
-   display_read_events                       :: proc(display: ^display) -> int ---
+   display_read_events                       :: proc(display: ^display) -> i32 ---
    display_set_max_buffer_size               :: proc(display: ^display, max_buffer_size: c.size_t) ---
 
-   proxy_marshal_flags                       :: proc(p: ^proxy, opcode: uint, intf: ^interface, version: uint, flags: uint, #c_vararg args: ..any) -> ^proxy ---
-   proxy_marshal                             :: proc(p: ^proxy, opcode: uint, #c_vararg args: ..any) ---
+   proxy_marshal_flags                       :: proc(p: ^proxy, opcode: u32, intf: ^interface, version: u32, flags: u32, #c_vararg args: ..any) -> ^proxy ---
+   proxy_marshal                             :: proc(p: ^proxy, opcode: u32, #c_vararg args: ..any) ---
    proxy_create                              :: proc(factory: ^proxy, intf: ^interface) -> ^proxy ---
    proxy_create_wrapper                      :: proc(proxy: rawptr) -> rawptr ---
    proxy_wrapper_destroy                     :: proc(proxy_wrapper: rawptr) ---
-   proxy_marshal_constructor                 :: proc(p: ^proxy, opcode: uint, intf: ^interface, #c_vararg args: ..any) -> ^proxy ---
-   proxy_marshal_constructor_versioned       :: proc(p: ^proxy, opcode: uint, intf: ^interface, version: uint, #c_vararg args: ..any) -> ^proxy ---
-   proxy_marshal_array_constructor           :: proc(p: ^proxy, opcode: uint, args: ^argument, intf: ^interface) -> ^proxy ---
-   proxy_marshal_array_constructor_versioned :: proc(p: ^proxy, opcode: uint, args: ^argument, intf: ^interface, version: uint) -> ^proxy ---
+   proxy_marshal_constructor                 :: proc(p: ^proxy, opcode: u32, intf: ^interface, #c_vararg args: ..any) -> ^proxy ---
+   proxy_marshal_constructor_versioned       :: proc(p: ^proxy, opcode: u32, intf: ^interface, version: u32, #c_vararg args: ..any) -> ^proxy ---
+   proxy_marshal_array_constructor           :: proc(p: ^proxy, opcode: u32, args: ^argument, intf: ^interface) -> ^proxy ---
+   proxy_marshal_array_constructor_versioned :: proc(p: ^proxy, opcode: u32, args: ^argument, intf: ^interface, version: u32) -> ^proxy ---
    proxy_destroy                             :: proc(p: ^proxy) ---
-   proxy_add_listener                        :: proc(p: ^proxy, impl: ^generic_c_call, data: rawptr) -> int ---
+   proxy_add_listener                        :: proc(p: ^proxy, impl: ^generic_c_call, data: rawptr) -> i32 ---
    proxy_get_listener                        :: proc(p: ^proxy) -> rawptr ---
-   proxy_add_dispatcher                      :: proc(p: ^proxy, func: dispatcher_func_t, dispatcher_data: rawptr, data: rawptr) -> int ---
+   proxy_add_dispatcher                      :: proc(p: ^proxy, func: dispatcher_func_t, dispatcher_data: rawptr, data: rawptr) -> i32 ---
    proxy_set_user_data                       :: proc(p: ^proxy, user_data: rawptr) ---
    proxy_get_user_data                       :: proc(p: ^proxy) -> rawptr ---
-   proxy_get_version                         :: proc(p: ^proxy) -> uint ---
-   proxy_get_id                              :: proc(p: ^proxy) -> uint ---
+   proxy_get_version                         :: proc(p: ^proxy) -> u32 ---
+   proxy_get_id                              :: proc(p: ^proxy) -> u32 ---
    proxy_set_tag                             :: proc(p: ^proxy, tag: ^u8) ---
    proxy_get_tag                             :: proc(p: ^proxy) -> ^u8 ---
    proxy_get_class                           :: proc(p: ^proxy) -> ^u8 ---
